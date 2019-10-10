@@ -2,13 +2,17 @@ package com.xa.springboot.xaproject.transaction;
 
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.mysql.cj.jdbc.MysqlXid;
+import com.sun.tools.javac.comp.Env;
 import org.springframework.stereotype.Component;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,7 +28,6 @@ import java.util.Properties;
 @Component
 public class DistributeTransaction {
     private Properties props;
-    private String propertyfile = "jdbc.properties";
 
     private String sql_1 = "delete from orders where order_id=12;";
     private String sql_2 = "INSERT INTO banks(user_id,money) VALUES(2,150);";
@@ -41,9 +44,14 @@ public class DistributeTransaction {
         XAResource xaResource_1 = null;
         XAResource xaResource_2 = null;
 
+        String propertyfile = "classpath:jdbc.properties";
         try {
             props = new Properties();
-            props.load(getClass().getResourceAsStream(propertyfile));
+            System.out.println(this.getClass().getClassLoader());
+            System.out.println(this.getClass().getClassLoader().getResource(propertyfile).getPath());
+            File file = new File(this.getClass().getClassLoader().getResource(propertyfile).getPath());
+            InputStream inputStream = new FileInputStream(file);
+            props.load(inputStream);
         } catch (IOException io) {
             System.err.println("Error while accessing the properties file (" + propertyfile + "). Abort.");
             System.exit(1);
